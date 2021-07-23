@@ -15,7 +15,10 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
-import logging
+import logging, shelve
+
+flashcards = shelve.open('flashcards.db',writeback=True)
+
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from telegram import ReplyKeyboardMarkup
@@ -56,14 +59,19 @@ def flashcard(update,context):
 def old(update,context):
     update.message.reply_text("Im old")
 def new(update,context):
-    if context.args is None:
+    if context.args ==[]:
         update.message.reply_text("Enter title of your flashcard (/new (insert title here))")
     else:
         update.message.reply_text("Entered title: ")
         answer = " ".join(context.args)
         update.message.reply_text(answer)
-        
+        flashcards[answer]=(update.message.chat_id)
+        flashcards.close()
 
+
+for key in flashcards:
+    print(key)
+    print(flashcards[key])
 
 
 
