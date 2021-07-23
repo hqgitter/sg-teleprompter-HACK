@@ -65,9 +65,18 @@ def new(update,context):
         update.message.reply_text("Entered title: ")
         answer = " ".join(context.args)
         update.message.reply_text(answer)
-        flashcards[answer]=(update.message.chat_id)
-        flashcards.close()
+        flashcards[answer]=[(update.message.chat_id)]
+        update.message.reply_text("next you can add your question via '/question (title of flashcard) (insert question here)")
 
+def question(update,context):
+    for key in flashcards:
+        print(key)
+
+        if key == context.args[0]:
+            print(flashcards[key])
+            print(context.args[1:])
+            flashcards[key].append(context.args[1:])
+    print(context.args[1])
 
 for key in flashcards:
     print(key)
@@ -94,6 +103,8 @@ def main():
     dp.add_handler(CommandHandler("flashcard",flashcard))
     dp.add_handler(CommandHandler("old",old))
     dp.add_handler(CommandHandler("new",new))
+    dp.add_handler(CommandHandler("question",question))
+
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, new))
 
