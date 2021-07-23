@@ -18,6 +18,7 @@ bot.
 import logging
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import ReplyKeyboardMarkup
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -48,12 +49,23 @@ def error(update, context):
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
 def flashcard(update,context):
-    update.message.reply_text('Would you like to add a new flashcard or review old ones?')
-    update.message.reply_text(context.args)
-    if context.args[0]=='old':
-        update.message.reply_text('OLD!')
-    elif context.args[0]=='new':
-        update.message.reply_text('NEW!')
+    chat_id=update.message.chat_id
+    keyboard = [['/old'],['/new']]
+    reply_markup = ReplyKeyboardMarkup(keyboard,one_time_keyboard=True)
+    update.message.reply_text("Would you like to enter new flashcards or review old ones",reply_markup=reply_markup)
+def old(update,context):
+    update.message.reply_text("Im old")
+def new(update,context):
+    if context.args is None:
+        update.message.reply_text("Enter title of your flashcard (/new (insert title here))")
+    else:
+        update.message.reply_text("Entered title: ")
+        answer = " ".join(context.args)
+        update.message.reply_text(answer)
+        
+
+
+
 
 
 
@@ -72,8 +84,10 @@ def main():
     dp.add_handler(CommandHandler("help", help))
 
     dp.add_handler(CommandHandler("flashcard",flashcard))
+    dp.add_handler(CommandHandler("old",old))
+    dp.add_handler(CommandHandler("new",new))
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, new))
 
     # log all errors
     dp.add_error_handler(error)
