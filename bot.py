@@ -57,7 +57,12 @@ def flashcard(update,context):
     reply_markup = ReplyKeyboardMarkup(keyboard,one_time_keyboard=True)
     update.message.reply_text("Would you like to enter new flashcards or review old ones",reply_markup=reply_markup)
 def old(update,context):
-    update.message.reply_text("Im old")
+    keyboard = []
+    for key in flashcards:
+        keyboard.append(["/review "+key])
+    reply_markup=ReplyKeyboardMarkup(keyboard,one_time_keyboard=True)
+    update.message.reply_text("select the flashcard you would like to review by title:",reply_markup=reply_markup)
+
 def new(update,context):
     if context.args ==[]:
         update.message.reply_text("Enter title of your flashcard (/new (insert title here))")
@@ -65,8 +70,11 @@ def new(update,context):
         update.message.reply_text("Entered title: ")
         answer = " ".join(context.args)
         update.message.reply_text(answer)
-        flashcards[answer]=[(update.message.chat_id)]
+        flashcards[answer]={'chat_id':update.message.chat_id,'qn':'','ans':''}
+        flashcards[answer]['chat_id']=update.message.chat_id
         update.message.reply_text("next you can add your question via '/question (title of flashcard) (insert question here)")
+flashcards.close()
+flashcards = shelve.open('flashcards.db',writeback=True)
 
 def question(update,context):
     for key in flashcards:
@@ -74,13 +82,44 @@ def question(update,context):
 
         if key == context.args[0]:
             print(flashcards[key])
-            print(context.args[1:])
-            flashcards[key].append(context.args[1:])
+            userqn = " ".join(context.args[1:])
+            flashcards[key]['qn']=(userqn)
+            print(flashcards[key])
+            flashcards.close()
     print(context.args[1])
+    update.message.reply_text("then you may add your answer to this question via '/addanswer (title of flashcard) (insert answer here)")
+flashcards = shelve.open('flashcards.db',writeback=True)
+def addanswer(update,context):
+    for key in flashcards:
+        if key ==context.args[0]:
+            userans=" ".join(context.args[1:])
+            flashcards[key]['ans']=userans
+            flashcards.close()
+
+def review(update,context):
+    for key in flashcards:
+        if key==context.args[0]:
+            update.message.reply_text("Question: "+flashcards[key]['qn'])
+            update.message.reply_text("answer with '/ans (title of qn) (answer here):")
+def ans(update,context):
+    for key in flashcards:
+        if key==context.args[0]:
+            print(context.args[1])
+            print(flashcards[key]['ans'])
+            userans = " ".join(context.args[1:])
+            if userans==flashcards[key]['ans']:
+                update.message.reply_text('Correct')
+            else:
+                update.message.reply_text('Incorrect')
+
+flashcards = shelve.open('flashcards.db',writeback=True)
 
 for key in flashcards:
     print(key)
     print(flashcards[key])
+
+
+
 
 
 
@@ -104,9 +143,14 @@ def main():
     dp.add_handler(CommandHandler("old",old))
     dp.add_handler(CommandHandler("new",new))
     dp.add_handler(CommandHandler("question",question))
+    dp.add_handler(CommandHandler("addanswer",addanswer))
+    dp.add_handler(CommandHandler("review",review))
+    dp.add_handler(CommandHandler("ans",ans))
+
+
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, new))
+    dp.add_handler(MessageHandler(Filters.text, review))
 
     # log all errors
     dp.add_error_handler(error)
@@ -122,3 +166,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+flashcards.close()
