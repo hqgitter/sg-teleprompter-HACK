@@ -76,9 +76,9 @@ def new(update,context):
         update.message.reply_text("next you can add your question via '/question (title of flashcard) (insert question here)")
         flashcards.close()
 
-flashcards = shelve.open('flashcards.db',writeback=True)
 
 def question(update,context):
+    flashcards = shelve.open('flashcards.db', writeback=True)
     for key in flashcards:
 
         if key == context.args[0]:
@@ -87,8 +87,8 @@ def question(update,context):
             flashcards.close()
     update.message.reply_text("then you may add your answer to this question via '/addanswer (title of flashcard) (insert answer here)")
 
-flashcards = shelve.open('flashcards.db',writeback=True)
 def addanswer(update,context):
+    flashcards = shelve.open('flashcards.db', writeback=True)
     for key in flashcards:
         if key ==context.args[0]:
             userans=" ".join(context.args[1:])
@@ -112,6 +112,7 @@ def ans(update,context):
                 update.message.reply_text('Incorrect')
 
 flashcards = shelve.open('flashcards.db',writeback=True)
+
 
 
 
