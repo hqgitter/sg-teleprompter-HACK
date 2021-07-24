@@ -35,6 +35,7 @@ logger = logging.getLogger(__name__)
 def start(update, context):
     """Send a message when the command /start is issued."""
     update.message.reply_text('Hi!')
+    update.message.reply_text('To add/review flashcards, start with /flashcard')
 
 
 def help(update, context):
@@ -73,29 +74,28 @@ def new(update,context):
         flashcards[answer]={'chat_id':update.message.chat_id,'qn':'','ans':''}
         flashcards[answer]['chat_id']=update.message.chat_id
         update.message.reply_text("next you can add your question via '/question (title of flashcard) (insert question here)")
-flashcards.close()
+        flashcards.close()
+
 flashcards = shelve.open('flashcards.db',writeback=True)
 
 def question(update,context):
     for key in flashcards:
-        print(key)
 
         if key == context.args[0]:
-            print(flashcards[key])
             userqn = " ".join(context.args[1:])
             flashcards[key]['qn']=(userqn)
-            print(flashcards[key])
             flashcards.close()
-    print(context.args[1])
     update.message.reply_text("then you may add your answer to this question via '/addanswer (title of flashcard) (insert answer here)")
+
 flashcards = shelve.open('flashcards.db',writeback=True)
 def addanswer(update,context):
     for key in flashcards:
         if key ==context.args[0]:
             userans=" ".join(context.args[1:])
             flashcards[key]['ans']=userans
-            flashcards.close()
+    update.message.reply_text('Added answer. You may review by doing /review (title of question)')
 
+flashcards.close()
 def review(update,context):
     for key in flashcards:
         if key==context.args[0]:
@@ -104,8 +104,7 @@ def review(update,context):
 def ans(update,context):
     for key in flashcards:
         if key==context.args[0]:
-            print(context.args[1])
-            print(flashcards[key]['ans'])
+
             userans = " ".join(context.args[1:])
             if userans==flashcards[key]['ans']:
                 update.message.reply_text('Correct')
@@ -113,10 +112,6 @@ def ans(update,context):
                 update.message.reply_text('Incorrect')
 
 flashcards = shelve.open('flashcards.db',writeback=True)
-
-for key in flashcards:
-    print(key)
-    print(flashcards[key])
 
 
 
